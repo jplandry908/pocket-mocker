@@ -11,10 +11,10 @@ export interface MockRule {
   headers: Record<string, string>
 }
 
-// 当前规则列表
+// Current rule list
 let activeRules: MockRule[] = []
 
-// 提供给外部更新规则的方法
+// Method for external updates to rules
 export function updateRules(rules: MockRule[]) {
   activeRules = rules
 }
@@ -24,15 +24,15 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export function patchFetch() {
   const originalFetch = window.fetch;
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const startTime = performance.now(); // 开始计时
+    const startTime = performance.now(); // Start timing
     const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
     const method = (init?.method || 'GET').toUpperCase();
 
-    // 查找匹配且开启的规则
+    // Find matching and enabled rules
     const matchedRule = activeRules.find(r => {
       if (!r.enabled || r.method !== method) return false;
 
-      // 改进匹配逻辑：支持精确匹配和包含匹配
+      // Improved matching logic: supports exact matching and inclusion matching
       const isExactMatch = url === r.url || url.endsWith(r.url);
       const isIncludeMatch = url.includes(r.url);
 
@@ -40,9 +40,9 @@ export function patchFetch() {
     });
 
     if (matchedRule) {
-      // === 关键逻辑：如果有延迟，先等待 ===
+      // === Key logic: wait for delay if set ===
       if (matchedRule.delay > 0) {
-        console.log(`⏱️ [PocketMock] 延迟 ${matchedRule.delay}ms`);
+        console.log(`⏱️ [PocketMock] Delay ${matchedRule.delay}ms`);
         await sleep(matchedRule.delay);
       }
 
@@ -70,8 +70,8 @@ export function patchFetch() {
 }
 
 /**
- * 核心：拦截 XMLHttpRequest (新增)
- * 使用继承的方式来扩展原生 XHR 类
+ * Core: Intercept XMLHttpRequest (new addition)
+ * Use inheritance to extend the native XHR class
  */
 
 function patchXHR() {
@@ -80,44 +80,44 @@ function patchXHR() {
   class PocketXHR extends OriginalXHR {
     private _url: string = ''
     private _method: string = 'GET'
-    private _startTime: number = 0; // 新增
+    private _startTime: number = 0; // New addition
 
-    // 1. 劫持 open 方法：仅仅是为了获取 URL 和 Method
+    // 1. Hijack open method: just to get URL and Method
     open(method: string, url: string | URL, async: boolean = true, username?: string | null, password?: string | null): void {
       this._url = url.toString();
       this._method = method.toUpperCase();
-      this._startTime = performance.now(); // 开始计时
-      // 调用原生 open 初始化状态
+      this._startTime = performance.now(); // Start timing
+      // Call native open to initialize state
       super.open(method, url, async, username, password);
     }
 
-    // 2. 劫持 send 方法：决定是发真请求，还是返回假数据
+    // 2. Hijack send method: decide whether to send real request or return fake data
     send(body?: Document | XMLHttpRequestBodyInit | null): void {
       const matchedRule = activeRules.find(r =>
         r.enabled && this._url.includes(r.url) && r.method === this._method
       );
 
       if (matchedRule) {
-        // 模拟响应过程
+        // Simulate response process
         const mockResponse = async () => {
           if (matchedRule.delay > 0) await sleep(matchedRule.delay);
 
-          // === 关键黑魔法：覆写只读属性 ===
-          // 浏览器原本不允许直接给 this.responseText 赋值，必须用 defineProperty
+          // === Key dark magic: override read-only properties ===
+          // Browser normally doesn't allow direct assignment to this.responseText, must use defineProperty
           Object.defineProperty(this, 'status', { value: matchedRule.status });
           Object.defineProperty(this, 'statusText', { value: matchedRule.status === 200 ? 'OK' : 'Error' });
           Object.defineProperty(this, 'readyState', { value: 4 }); // DONE
           Object.defineProperty(this, 'response', { value: JSON.stringify(matchedRule.response) });
           Object.defineProperty(this, 'responseText', { value: JSON.stringify(matchedRule.response) });
-          // 这一步是为了兼容 axios，axios 会自动 parse JSON
+          // This step is for axios compatibility, axios will automatically parse JSON
           Object.defineProperty(this, 'responseURL', { value: this._url });
 
-          // 手动触发事件，欺骗业务代码说"请求完成了"
-          // dispatchEvent 会自动触发对应的回调函数，不需要手动调用
+          // Manually trigger events to deceive business code that "request is complete"
+          // dispatchEvent will automatically trigger corresponding callback functions, no manual call needed
           this.dispatchEvent(new Event('readystatechange'));
           this.dispatchEvent(new Event('load'));
 
-          // 记录日志
+          // Log recording
           const duration = Math.round(performance.now() - this._startTime);
           requestLogs.add({
             method: this._method,
@@ -138,19 +138,19 @@ function patchXHR() {
         };
 
         mockResponse();
-        return; // ⛔️ 阻止原生 send 发送请求
+        return; // ⛔️ Prevent native send from sending request
       }
 
-      // 没命中规则，透传给原生 XHR
+      // No rule matched, pass through to native XHR
       super.send(body);
     }
   }
-  // 替换全局对象
+  // Replace global object
   window.XMLHttpRequest = PocketXHR;
 }
 
 export function initInterceptor() {
-  console.log('%c PocketMock 已启动 (Fetch + XHR) ', 'background: #222; color: #bada55');
+  console.log('%c PocketMock started (Fetch + XHR) ', 'background: #222; color: #bada55');
   patchFetch();
   patchXHR();
 }

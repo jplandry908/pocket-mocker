@@ -3,24 +3,23 @@ import { writable } from 'svelte/store';
 import { type MockRule, updateRules } from './interceptor';
 
 const STORAGE_KEY = 'pocket_mock_rules_v1';
-let isServerMode = false; // 标记当前运行模式
+let isServerMode = false; // Current runtime mode flag
 
 export const rules = writable<MockRule[]>([]);
 
-// === 1. 从 Dev Server 加载规则 ===
-// === 初始化逻辑 ===
+// === Initialization logic ===
 export const initStore = async () => {
-  // 初始化确保是 LocalStorage 模式
+  // Initialize as LocalStorage mode
   isServerMode = false;
 
   try {
-    // 尝试连接 Dev Server，设置1秒超时
+    // Try to connect to Dev Server with 1s timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1000);
 
     const res = await fetch('/__pocket_mock/rules', {
       signal: controller.signal,
-      cache: 'no-store' // 禁用缓存
+      cache: 'no-store' // Disable cache
     });
     clearTimeout(timeoutId);
 
@@ -29,33 +28,33 @@ export const initStore = async () => {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         rules.set(data);
-        console.log('[PocketMock] 连接到 Dev Server，文件同步模式');
+        console.log('[PocketMock] Connected to Dev Server, file sync mode');
         return;
       } else {
-        isServerMode = false; // 空数组，降级到 LocalStorage
+        isServerMode = false; // Empty array, fallback to LocalStorage
       }
     } else {
       isServerMode = false;
     }
   } catch (e) {
-    // 探测失败，使用 LocalStorage 模式
+    // Detection failed, use LocalStorage mode
     isServerMode = false;
   }
 
-  // 降级：读取 LocalStorage
+  // Fallback: read from LocalStorage
   try {
     const json = localStorage.getItem(STORAGE_KEY);
     if (json) {
       const data = JSON.parse(json);
       rules.set(data);
-      console.log('[PocketMock] LocalStorage 模式，加载规则:', data.length, '条');
+      console.log('[PocketMock] LocalStorage mode, loaded rules:', data.length);
       return;
     }
   } catch (e) {
-    console.error('[PocketMock] LocalStorage 读取失败:', e);
+    console.error('[PocketMock] LocalStorage read failed:', e);
   }
 
-  // 兜底：使用默认数据
+  // Fallback: use default data
   rules.set([{
     id: 'demo-1',
     url: '/api/demo',
@@ -66,30 +65,30 @@ export const initStore = async () => {
     status: 200,
     headers: {}
   }]);
-  console.log('[PocketMock] LocalStorage 模式，使用默认规则');
+  console.log('[PocketMock] LocalStorage mode, using default rules');
 };
 
-// === 订阅与保存逻辑 ===
+// === Subscription and save logic ===
 let saveTimer: any;
 rules.subscribe((value) => {
   updateRules(value);
 
-  // 防抖保存
+  // Debounced save
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     if (isServerMode) {
-      // Server 模式：保存到文件
+      // Server mode: save to file
       fetch('/__pocket_mock/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(value, null, 2)
-      }).catch(e => console.error('[PocketMock] 文件保存失败:', e));
+      }).catch(e => console.error('[PocketMock] File save failed:', e));
     } else {
-      // LocalStorage 模式：保存到浏览器
+      // LocalStorage mode: save to browser
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
       } catch (e) {
-        console.error('[PocketMock] LocalStorage 保存失败:', e);
+        console.error('[PocketMock] LocalStorage save failed:', e);
       }
     }
   }, 500);

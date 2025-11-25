@@ -2,26 +2,26 @@
   import { rules, toggleRule, updateRuleResponse, addRule, deleteRule, updateRuleDelay, updateRuleStatus, updateRuleHeaders } from '../core/store';
   import { requestLogs } from '../core/log-store';
   
-  // 控制浮窗展开/收起
+  // Control panel expand/collapse
   let minimized = false;
-  // 当前正在编辑的规则 ID
+  // Currently editing rule ID
   let editingId: string | null = null;
-  // 临时的编辑内容字符串
+  // Temporary edit content strings
   let editContent = "";
   let editHeadersContent = "";
   let activeTab: 'body' | 'headers' = 'body';
   
-  // 主 Tab 状态
+  // Main tab status
   let activeMainTab: 'rules' | 'network' = 'rules';
 
-  // 新增规则状态
+  // New rule status
   let showAddPanel = false;
   let newRuleUrl = "";
   let newRuleMethod = "GET";
 
   function handleAddRule() {
     if (!newRuleUrl) {
-      alert("请输入 URL");
+      alert("Please enter URL");
       return;
     }
     addRule(newRuleUrl, newRuleMethod);
@@ -33,7 +33,7 @@
   function startEdit(rule: any) {
     editingId = rule.id;
     activeTab = 'body';
-    // 格式化 JSON，缩进 2 空格
+    // Format JSON with 2-space indent
     editContent = JSON.stringify(rule.response, null, 2);
     editHeadersContent = JSON.stringify(rule.headers || {}, null, 2);
   }
@@ -44,9 +44,9 @@
       const successHeaders = updateRuleHeaders(editingId, editHeadersContent);
       
       if (successBody && successHeaders) {
-        editingId = null; // 退出编辑模式
+        editingId = null; // Exit edit mode
       } else {
-        alert("JSON 格式有误，请检查 Body 或 Headers！");
+        alert("Invalid JSON format, please check Body or Headers!");
       }
     }
   }
@@ -64,7 +64,7 @@
         <span class="rule-count">{$rules.length}</span>
       {/if}
       {#if !minimized && activeMainTab === 'rules'}
-        <button class="icon-btn" on:click={() => showAddPanel = !showAddPanel} title="新增规则">
+        <button class="icon-btn" on:click={() => showAddPanel = !showAddPanel} title="Add rule">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -72,7 +72,7 @@
       {/if}
     </div>
     
-    <button class="toggle-btn" on:click={() => minimized = !minimized} title={minimized ? '展开面板' : '收起面板'}>
+    <button class="toggle-btn" on:click={() => minimized = !minimized} title={minimized ? 'Expand panel' : 'Collapse panel'}>
       {#if minimized}
         <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
           <path d="M3 5h6v2H3z"/>
@@ -107,16 +107,16 @@
               <input type="text" placeholder="/api/path" bind:value={newRuleUrl} />
             </div>
             <div class="form-actions">
-              <button class="btn-secondary" on:click={() => showAddPanel = false}>取消</button>
-              <button class="btn-primary" on:click={handleAddRule}>添加</button>
+              <button class="btn-secondary" on:click={() => showAddPanel = false}>Cancel</button>
+              <button class="btn-primary" on:click={handleAddRule}>Add</button>
             </div>
           </div>
         {/if}
 
         {#if $rules.length === 0 && !showAddPanel}
           <div class="empty-state">
-            <p>暂无拦截规则</p>
-            <p style="font-size: 12px; margin-top: 8px;">发起请求后将自动显示规则</p>
+            <p>No interception rules</p>
+            <p style="font-size: 12px; margin-top: 8px;">Rules will appear automatically after making requests</p>
           </div>
         {:else}
           {#each $rules as rule (rule.id)}
@@ -127,8 +127,8 @@
                   <span class="url">{rule.url}</span>
                 </div>
                 <div class="header-actions">
-                  <input type="checkbox" checked={rule.enabled} on:change={() => toggleRule(rule.id)} title="启用/禁用" />
-                  <button class="icon-btn delete-btn" on:click={() => deleteRule(rule.id)} title="删除规则">
+                  <input type="checkbox" checked={rule.enabled} on:change={() => toggleRule(rule.id)} title="Enable/Disable" />
+                  <button class="icon-btn delete-btn" on:click={() => deleteRule(rule.id)} title="Delete rule">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                     </svg>
@@ -139,7 +139,7 @@
               <div class="card-toolbar">
                 <div class="toolbar-group">
                   <div class="delay-control">
-                    <span class="label">延迟: {rule.delay || 0}ms</span>
+                    <span class="label">Delay: {rule.delay || 0}ms</span>
                     <input 
                       type="range" 
                       min="0" 
@@ -160,13 +160,13 @@
                       value={rule.status || 200}
                       on:input={(e) => {
                         const value = e.currentTarget.value;
-                        // 允许输入5位数字，实时更新
+                        // Allow 5-digit input, real-time update
                         if (/^\d{0,5}$/.test(value)) {
                           updateRuleStatus(rule.id, value ? parseInt(value) : 200);
                         }
                       }}
                       on:blur={(e) => {
-                        // 失去焦点时确保有有效值
+                        // Ensure valid value on blur
                         const value = parseInt(e.currentTarget.value) || 200;
                         if (value < 100) updateRuleStatus(rule.id, 200);
                         else if (value > 999) updateRuleStatus(rule.id, 999);
@@ -174,7 +174,7 @@
                       }}
                       placeholder="200"
                       maxlength="5"
-                      title="输入HTTP状态码 (100-999)"
+                      title="Enter HTTP status code (100-999)"
                     />
                   </div>
                 </div>
@@ -194,8 +194,8 @@
                   {/if}
 
                   <div class="actions">
-                    <button class="btn-save" on:click|stopPropagation={saveEdit}>保存</button>
-                    <button class="btn-cancel" on:click|stopPropagation={cancelEdit}>取消</button>
+                    <button class="btn-save" on:click|stopPropagation={saveEdit}>Save</button>
+                    <button class="btn-cancel" on:click|stopPropagation={cancelEdit}>Cancel</button>
                   </div>
                 </div>
               {:else}
@@ -213,7 +213,7 @@
                   tabindex="0"
                 >
                   <pre>{JSON.stringify(rule.response, null, 2)}</pre>
-                  <div class="hint">点击修改 JSON</div>
+                  <div class="hint">Click to edit JSON</div>
                 </div>
               {/if}
             </div>
@@ -223,7 +223,7 @@
         <div class="network-logs">
           {#if $requestLogs.length === 0}
             <div class="empty-state">
-              <p>暂无请求记录</p>
+              <p>No request records</p>
             </div>
           {:else}
             {#each $requestLogs as log (log.id)}
@@ -247,7 +247,6 @@
 </div>
 
 <style>
-  /* 容器样式 - 现代化卡片设计 */
   .container {
     position: fixed;
     bottom: 24px;
@@ -270,12 +269,12 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
-    height: 600px; /* 固定高度 */
+    height: 600px; /* Fixed height */
     max-height: 80vh;
     z-index: 10000;
   }
 
-  /* 最小化状态 */
+  /* Minimized state */
   .container.minimized {
     width: auto;
     min-width: 140px;
@@ -306,7 +305,6 @@
     transform: none;
   }
 
-  /* 头部样式 */
   .header {
     display: flex;
     justify-content: space-between;
@@ -317,7 +315,6 @@
     border-radius: 16px 16px 0 0;
   }
   
-  /* 主 Tab 栏 - 分段控制器样式 */
   .main-tabs {
     display: flex;
     background: #f1f5f9;
@@ -367,7 +364,7 @@
     letter-spacing: -0.01em;
   }
 
-  /* 规则计数徽章 */
+  /* Rule count badge */
   .rule-count {
     background: #f3f4f6;
     color: #4b5563;
@@ -378,7 +375,7 @@
     border: 1px solid rgba(0,0,0,0.04);
   }
 
-  /* 折叠按钮 */
+  /* Toggle button */
   .toggle-btn {
     background: transparent;
     border: none;
@@ -397,14 +394,12 @@
     color: #333;
   }
 
-  /* 内容区域 */
   .content {
     padding: 12px;
     overflow-y: auto;
-    flex: 1; /* 占据剩余空间 */
+    flex: 1;
   }
 
-  /* 自定义滚动条 */
   .content::-webkit-scrollbar {
     width: 4px;
   }
@@ -422,7 +417,6 @@
     background: rgba(0, 0, 0, 0.2);
   }
 
-  /* 卡片样式 */
   .card {
     background: white;
     border: 1px solid rgba(0, 0, 0, 0.04);
@@ -439,7 +433,6 @@
     transform: translateY(-1px);
   }
 
-  /* 卡片头部 */
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -454,7 +447,6 @@
     border-bottom-color: rgba(0,0,0,0.04);
   }
 
-  /* 徽章区域 */
   .badges {
     display: flex;
     align-items: center;
@@ -472,7 +464,6 @@
     letter-spacing: 0.02em;
   }
 
-  /* HTTP 方法标签 - 柔和配色 */
   .method {
     background: #f3f4f6;
     color: #4b5563;
@@ -494,7 +485,6 @@
     letter-spacing: -0.01em;
   }
 
-  /* 复选框样式 */
   input[type="checkbox"] {
     width: 16px;
     height: 16px;
@@ -525,7 +515,7 @@
     transform: translate(-50%, -50%) rotate(45deg);
   }
 
-  /* 预览区域 */
+  /* Preview area */
   .preview {
     position: relative;
     padding: 12px;
@@ -533,12 +523,12 @@
     background: #fafafa;
     transition: background 0.2s ease;
     z-index: 1;
-    isolation: isolate; /* 创建新的层叠上下文 */
+    isolation: isolate; /* Create new stacking context */
   }
 
   .preview:hover {
     background: #f8fafc;
-    z-index: 2; /* 悬停时提高层级 */
+    z-index: 2; /* Increase z-index on hover */
   }
 
   .preview pre {
@@ -551,7 +541,7 @@
     line-height: 1.5;
     max-height: 100px;
     overflow-y: auto;
-    pointer-events: none; /* 防止文本干扰点击 */
+    pointer-events: none; /* Prevent text from interfering with clicks */
   }
 
   .hint {
@@ -567,7 +557,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     backdrop-filter: blur(4px);
-    pointer-events: none; /* 防止提示框干扰点击 */
+    pointer-events: none; /* Prevent hint box from interfering with clicks */
     z-index: 3;
   }
 
@@ -575,7 +565,7 @@
     opacity: 1;
   }
 
-  /* 编辑器区域 */
+  /* Editor area */
   .editor-area {
     padding: 12px;
     background: #fff;
@@ -603,7 +593,7 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  /* 按钮区域 */
+  /* Button area */
   .actions {
     margin-top: 10px;
     display: flex;
@@ -611,7 +601,7 @@
     justify-content: flex-end;
   }
 
-  /* 按钮样式 */
+  /* Button styles */
   button {
     cursor: pointer;
     padding: 6px 14px;
@@ -658,7 +648,6 @@
     margin-bottom: 4px;
   }
 
-  /* 新增面板 */
   .add-panel {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -706,7 +695,6 @@
     color: #4b5563;
   }
 
-  /* 图标按钮 */
   .icon-btn {
     background: transparent;
     border: none;
@@ -753,13 +741,11 @@
     gap: 8px;
   }
 
-  /* 让延迟滑块占据剩余空间 */
   .toolbar-group:first-child {
     flex: 1;
     min-width: 120px;
   }
 
-  /* 状态码保持自身宽度 */
   .toolbar-group:last-child {
     flex: 0 0 auto;
   }
@@ -774,8 +760,8 @@
   }
 
   .delay-control .label {
-    min-width: 75px; /* 固定宽度防止抖动 */
-    font-variant-numeric: tabular-nums; /* 等宽数字 */
+    min-width: 75px; /* Fixed width to prevent jitter */
+    font-variant-numeric: tabular-nums; /* Tabular numbers */
   }
 
   .delay-control input[type="range"] {

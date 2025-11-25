@@ -1,4 +1,3 @@
-// src/core/logStore.ts
 import { writable } from 'svelte/store';
 
 export interface LogEntry {
@@ -7,8 +6,8 @@ export interface LogEntry {
   url: string;
   status: number;
   timestamp: number;
-  duration: number; // 耗时(ms)
-  isMock: boolean;  // 标记是否被我们拦截了
+  duration: number;
+  isMock: boolean;
 }
 
 function createLogStore() {
@@ -19,7 +18,6 @@ function createLogStore() {
     add: (log: Omit<LogEntry, 'id'>) => {
       const entry = { ...log, id: Date.now().toString() + Math.random() };
       update(logs => {
-        // 新日志在最前，只保留最近 50 条
         const newLogs = [entry, ...logs];
         return newLogs.slice(0, 50);
       });
