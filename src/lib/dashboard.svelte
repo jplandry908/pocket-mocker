@@ -154,12 +154,27 @@
                 <div class="toolbar-group">
                   <div class="status-control">
                     <span class="label">Status:</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="text"
                       class="status-input"
-                      value={rule.status || 200} 
-                      on:input={(e) => updateRuleStatus(rule.id, +e.currentTarget.value)}
+                      value={rule.status || 200}
+                      on:input={(e) => {
+                        const value = e.currentTarget.value;
+                        // 允许输入5位数字，实时更新
+                        if (/^\d{0,5}$/.test(value)) {
+                          updateRuleStatus(rule.id, value ? parseInt(value) : 200);
+                        }
+                      }}
+                      on:blur={(e) => {
+                        // 失去焦点时确保有有效值
+                        const value = parseInt(e.currentTarget.value) || 200;
+                        if (value < 100) updateRuleStatus(rule.id, 200);
+                        else if (value > 999) updateRuleStatus(rule.id, 999);
+                        else updateRuleStatus(rule.id, value);
+                      }}
                       placeholder="200"
+                      maxlength="5"
+                      title="输入HTTP状态码 (100-999)"
                     />
                   </div>
                 </div>
@@ -168,10 +183,10 @@
               {#if editingId === rule.id}
                 <div class="editor-area">
                   <div class="tabs">
-                    <button class="tab-btn" class:active={activeTab === 'body'} on:click={() => activeTab = 'body'}>Body</button>
-                    <button class="tab-btn" class:active={activeTab === 'headers'} on:click={() => activeTab = 'headers'}>Headers</button>
+                    <button class="tab-btn" class:active={activeTab === 'body'} on:click|stopPropagation={() => activeTab = 'body'}>Body</button>
+                    <button class="tab-btn" class:active={activeTab === 'headers'} on:click|stopPropagation={() => activeTab = 'headers'}>Headers</button>
                   </div>
-                  
+
                   {#if activeTab === 'body'}
                     <textarea bind:value={editContent} placeholder="Response Body JSON"></textarea>
                   {:else}
@@ -179,17 +194,18 @@
                   {/if}
 
                   <div class="actions">
-                    <button class="btn-save" on:click={saveEdit}>保存</button>
-                    <button class="btn-cancel" on:click={cancelEdit}>取消</button>
+                    <button class="btn-save" on:click|stopPropagation={saveEdit}>保存</button>
+                    <button class="btn-cancel" on:click|stopPropagation={cancelEdit}>取消</button>
                   </div>
                 </div>
               {:else}
                 <div
                   class="preview"
-                  on:click={() => startEdit(rule)}
+                  on:click|stopPropagation={() => startEdit(rule)}
                   on:keydown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
+                      e.stopPropagation();
                       startEdit(rule);
                     }
                   }}
@@ -516,10 +532,13 @@
     cursor: pointer;
     background: #fafafa;
     transition: background 0.2s ease;
+    z-index: 1;
+    isolation: isolate; /* 创建新的层叠上下文 */
   }
 
   .preview:hover {
     background: #f8fafc;
+    z-index: 2; /* 悬停时提高层级 */
   }
 
   .preview pre {
@@ -532,6 +551,7 @@
     line-height: 1.5;
     max-height: 100px;
     overflow-y: auto;
+    pointer-events: none; /* 防止文本干扰点击 */
   }
 
   .hint {
@@ -547,6 +567,8 @@
     padding: 2px 6px;
     border-radius: 4px;
     backdrop-filter: blur(4px);
+    pointer-events: none; /* 防止提示框干扰点击 */
+    z-index: 3;
   }
 
   .preview:hover .hint {
@@ -752,7 +774,7 @@
   }
 
   .delay-control .label {
-    min-width: 70px; /* 固定宽度防止抖动 */
+    min-width: 75px; /* 固定宽度防止抖动 */
     font-variant-numeric: tabular-nums; /* 等宽数字 */
   }
 
