@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { rules, toggleRule, updateRuleResponse } from '../core/store';
+  import { rules, toggleRule, updateRuleResponse, addRule, deleteRule, updateRuleDelay, updateRuleStatus, updateRuleHeaders } from '../core/store';
+  import { requestLogs } from '../core/log-store';
   
   // 控制浮窗展开/收起
   let minimized = false;
@@ -7,20 +8,45 @@
   let editingId: string | null = null;
   // 临时的编辑内容字符串
   let editContent = "";
+  let editHeadersContent = "";
+  let activeTab: 'body' | 'headers' = 'body';
+  
+  // 主 Tab 状态
+  let activeMainTab: 'rules' | 'network' = 'rules';
+
+  // 新增规则状态
+  let showAddPanel = false;
+  let newRuleUrl = "";
+  let newRuleMethod = "GET";
+
+  function handleAddRule() {
+    if (!newRuleUrl) {
+      alert("请输入 URL");
+      return;
+    }
+    addRule(newRuleUrl, newRuleMethod);
+    showAddPanel = false;
+    newRuleUrl = "";
+    newRuleMethod = "GET";
+  }
 
   function startEdit(rule: any) {
     editingId = rule.id;
+    activeTab = 'body';
     // 格式化 JSON，缩进 2 空格
     editContent = JSON.stringify(rule.response, null, 2);
+    editHeadersContent = JSON.stringify(rule.headers || {}, null, 2);
   }
 
   function saveEdit() {
     if (editingId) {
-      const success = updateRuleResponse(editingId, editContent);
-      if (success) {
+      const successBody = updateRuleResponse(editingId, editContent);
+      const successHeaders = updateRuleHeaders(editingId, editHeadersContent);
+      
+      if (successBody && successHeaders) {
         editingId = null; // 退出编辑模式
       } else {
-        alert("JSON 格式有误，请检查！");
+        alert("JSON 格式有误，请检查 Body 或 Headers！");
       }
     }
   }
@@ -38,6 +64,14 @@
         <span class="rule-count">{$rules.length}</span>
       {/if}
     </div>
+    
+    {#if !minimized}
+      <div class="main-tabs">
+        <button class="main-tab-btn" class:active={activeMainTab === 'rules'} on:click={() => activeMainTab = 'rules'}>Rules</button>
+        <button class="main-tab-btn" class:active={activeMainTab === 'network'} on:click={() => activeMainTab = 'network'}>Network</button>
+      </div>
+    {/if}
+
     <button class="toggle-btn" on:click={() => minimized = !minimized} title={minimized ? '展开面板' : '收起面板'}>
       {#if minimized}
         <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
@@ -53,49 +87,137 @@
 
   {#if !minimized}
     <div class="content">
-      {#if $rules.length === 0}
-        <div class="empty-state">
-          <p>暂无拦截规则</p>
-          <p style="font-size: 12px; margin-top: 8px;">发起请求后将自动显示规则</p>
-        </div>
-      {:else}
-        {#each $rules as rule (rule.id)}
-          <div class="card">
-            <div class="card-header">
-              <div class="badges">
-                <span class="badge method" class:GET={rule.method === 'GET'} class:POST={rule.method === 'POST'} class:PUT={rule.method === 'PUT'} class:DELETE={rule.method === 'DELETE'}>{rule.method}</span>
-                <span class="url">{rule.url}</span>
-              </div>
-              <input type="checkbox" checked={rule.enabled} on:change={() => toggleRule(rule.id)} />
+      {#if activeMainTab === 'rules'}
+        {#if showAddPanel}
+          <div class="add-panel">
+            <div class="form-row">
+              <select bind:value={newRuleMethod}>
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+              </select>
+              <input type="text" placeholder="/api/path" bind:value={newRuleUrl} />
             </div>
+            <div class="form-actions">
+              <button class="btn-secondary" on:click={() => showAddPanel = false}>取消</button>
+              <button class="btn-primary" on:click={handleAddRule}>添加</button>
+            </div>
+          </div>
+        {/if}
 
-            {#if editingId === rule.id}
-              <div class="editor-area">
-                <textarea bind:value={editContent}></textarea>
-                <div class="actions">
-                  <button class="btn-save" on:click={saveEdit}>保存</button>
-                  <button class="btn-cancel" on:click={cancelEdit}>取消</button>
+        {#if $rules.length === 0 && !showAddPanel}
+          <div class="empty-state">
+            <p>暂无拦截规则</p>
+            <p style="font-size: 12px; margin-top: 8px;">发起请求后将自动显示规则</p>
+          </div>
+        {:else}
+          {#each $rules as rule (rule.id)}
+            <div class="card">
+              <div class="card-header">
+                <div class="badges">
+                  <span class="badge method" class:GET={rule.method === 'GET'} class:POST={rule.method === 'POST'} class:PUT={rule.method === 'PUT'} class:DELETE={rule.method === 'DELETE'}>{rule.method}</span>
+                  <span class="url">{rule.url}</span>
+                </div>
+                <div class="header-actions">
+                  <input type="checkbox" checked={rule.enabled} on:change={() => toggleRule(rule.id)} title="启用/禁用" />
+                  <button class="icon-btn delete-btn" on:click={() => deleteRule(rule.id)} title="删除规则">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
-            {:else}
-              <div
-                class="preview"
-                on:click={() => startEdit(rule)}
-                on:keydown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    startEdit(rule);
-                  }
-                }}
-                role="button"
-                tabindex="0"
-              >
-                <pre>{JSON.stringify(rule.response, null, 2)}</pre>
-                <div class="hint">点击修改 JSON</div>
+
+              <div class="card-toolbar">
+                <div class="toolbar-group">
+                  <div class="delay-control">
+                    <span class="label">延迟: {rule.delay || 0}ms</span>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="5000" 
+                      step="100" 
+                      value={rule.delay || 0} 
+                      on:input={(e) => updateRuleDelay(rule.id, +e.currentTarget.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div class="toolbar-group">
+                  <div class="status-control">
+                    <span class="label">Status:</span>
+                    <input 
+                      type="number" 
+                      class="status-input"
+                      value={rule.status || 200} 
+                      on:input={(e) => updateRuleStatus(rule.id, +e.currentTarget.value)}
+                      placeholder="200"
+                    />
+                  </div>
+                </div>
               </div>
-            {/if}
-          </div>
-        {/each}
+
+              {#if editingId === rule.id}
+                <div class="editor-area">
+                  <div class="tabs">
+                    <button class="tab-btn" class:active={activeTab === 'body'} on:click={() => activeTab = 'body'}>Body</button>
+                    <button class="tab-btn" class:active={activeTab === 'headers'} on:click={() => activeTab = 'headers'}>Headers</button>
+                  </div>
+                  
+                  {#if activeTab === 'body'}
+                    <textarea bind:value={editContent} placeholder="Response Body JSON"></textarea>
+                  {:else}
+                    <textarea bind:value={editHeadersContent} placeholder="Response Headers JSON"></textarea>
+                  {/if}
+
+                  <div class="actions">
+                    <button class="btn-save" on:click={saveEdit}>保存</button>
+                    <button class="btn-cancel" on:click={cancelEdit}>取消</button>
+                  </div>
+                </div>
+              {:else}
+                <div
+                  class="preview"
+                  on:click={() => startEdit(rule)}
+                  on:keydown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      startEdit(rule);
+                    }
+                  }}
+                  role="button"
+                  tabindex="0"
+                >
+                  <pre>{JSON.stringify(rule.response, null, 2)}</pre>
+                  <div class="hint">点击修改 JSON</div>
+                </div>
+              {/if}
+            </div>
+          {/each}
+        {/if}
+      {:else if activeMainTab === 'network'}
+        <div class="network-logs">
+          {#if $requestLogs.length === 0}
+            <div class="empty-state">
+              <p>暂无请求记录</p>
+            </div>
+          {:else}
+            {#each $requestLogs as log (log.id)}
+              <div class="log-item">
+                <div class="log-header">
+                  <span class="status-badge" class:success={log.status >= 200 && log.status < 300} class:error={log.status >= 400}>{log.status}</span>
+                  <span class="method-badge">{log.method}</span>
+                  <span class="log-url" title={log.url}>{log.url}</span>
+                </div>
+                <div class="log-meta">
+                  <span class="duration">{log.duration}ms</span>
+                  <span class="time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
       {/if}
     </div>
   {/if}
@@ -125,7 +247,8 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
-    max-height: 75vh;
+    height: 600px; /* 固定高度 */
+    max-height: 80vh;
     z-index: 10000;
   }
 
@@ -141,6 +264,10 @@
   .container.minimized .header {
     padding: 10px 14px;
     border-bottom: none;
+  }
+  
+  .container.minimized .main-tabs {
+    display: none;
   }
 
   .container.minimized .toggle-btn {
@@ -165,6 +292,42 @@
     background: rgba(255, 255, 255, 0.5);
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     border-radius: 16px 16px 0 0;
+  }
+  
+  /* 主 Tab 栏 - 分段控制器样式 */
+  .main-tabs {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    margin: 12px 16px 0;
+    border-radius: 8px;
+    gap: 4px;
+  }
+
+  .main-tab-btn {
+    flex: 1;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+  }
+
+  .main-tab-btn:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .main-tab-btn.active {
+    color: #0f172a;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-weight: 600;
   }
 
   .title-area {
@@ -215,7 +378,7 @@
   .content {
     padding: 12px;
     overflow-y: auto;
-    max-height: calc(75vh - 54px);
+    flex: 1; /* 占据剩余空间 */
   }
 
   /* 自定义滚动条 */
@@ -464,6 +627,257 @@
     font-weight: 500;
     color: #64748b;
     margin-bottom: 4px;
+  }
+
+  /* 新增面板 */
+  .add-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .form-row select {
+    padding: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-size: 12px;
+  }
+
+  .form-row input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #4b5563;
+  }
+
+  /* 图标按钮 */
+  .icon-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: #1e293b;
+  }
+
+  .delete-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 工具栏（延迟滑块 + 状态码） */
+  .card-toolbar {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    background: #fafafa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 让延迟滑块占据剩余空间 */
+  .toolbar-group:first-child {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* 状态码保持自身宽度 */
+  .toolbar-group:last-child {
+    flex: 0 0 auto;
+  }
+
+  .delay-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: #64748b;
+    width: 100%;
+  }
+
+  .delay-control .label {
+    min-width: 70px; /* 固定宽度防止抖动 */
+    font-variant-numeric: tabular-nums; /* 等宽数字 */
+  }
+
+  .delay-control input[type="range"] {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .delay-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .status-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #64748b;
+    margin-left: auto;
+  }
+
+  .status-input {
+    width: 48px;
+    padding: 2px 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 11px;
+    background: white;
+    color: #334155;
+    text-align: center;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+
+  .status-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Tabs 样式 */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .tab-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .tab-btn:hover {
+    color: #334155;
+    background: #f1f5f9;
+  }
+
+  .tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: transparent;
+  }
+
+  /* Network Logs 样式 */
+  .network-logs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .log-item {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .log-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .status-badge {
+    font-weight: 700;
+    font-family: monospace;
+    color: #64748b;
+  }
+  
+  .status-badge.success { color: #059669; }
+  .status-badge.error { color: #dc2626; }
+
+  .method-badge {
+    font-weight: 600;
+    color: #4b5563;
+    font-size: 11px;
+  }
+
+  .log-url {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #334155;
+    font-family: monospace;
+  }
+
+  .log-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #94a3b8;
+    font-size: 11px;
   }
 
   /* 响应式设计 */
