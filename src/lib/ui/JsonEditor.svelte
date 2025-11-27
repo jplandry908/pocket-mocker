@@ -2,6 +2,8 @@
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { EditorView, basicSetup } from 'codemirror';
   import { EditorState } from '@codemirror/state';
+  import { keymap } from '@codemirror/view';
+  import { defaultKeymap } from '@codemirror/commands';
   import { json } from '@codemirror/lang-json';
   import { oneDark } from '@codemirror/theme-one-dark';
 
@@ -17,6 +19,8 @@
       doc: value,
       extensions: [
         basicSetup,
+        keymap.of(defaultKeymap),
+        EditorView.lineWrapping,
         json(),
         oneDark,
         EditorView.updateListener.of((update) => {
