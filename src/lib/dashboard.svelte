@@ -6,6 +6,7 @@
   import Input from './ui/Input.svelte';
   import Select from './ui/Select.svelte';
   import Switch from './ui/Switch.svelte';
+  import JsonEditor from './ui/JsonEditor.svelte';
   
   // Control panel expand/collapse
   let minimized = false;
@@ -358,21 +359,15 @@
                          </div>
                       </div>
                     {:else if activeTab === 'body'}
-                      <textarea
-                        class="code-editor"
-                        bind:value={editContent}
-                        placeholder="Response Body JSON"
-                        role="tabpanel"
-                        aria-labelledby="body-tab"
-                      ></textarea>
+                      <JsonEditor
+                        value={editContent}
+                        on:change={(e) => (editContent = e.detail)}
+                      />
                     {:else}
-                      <textarea
-                        class="code-editor"
-                        bind:value={editHeadersContent}
-                        placeholder="Response Headers JSON"
-                        role="tabpanel"
-                        aria-labelledby="headers-tab"
-                      ></textarea>
+                      <JsonEditor
+                        value={editHeadersContent}
+                        on:change={(e) => (editHeadersContent = e.detail)}
+                      />
                     {/if}
                   </div>
 
@@ -804,23 +799,7 @@
     margin-bottom: 4px;
   }
 
-  .code-editor {
-    width: 100%;
-    min-height: 150px;
-    background: var(--pm-input-bg);
-    border: 1px solid var(--pm-border);
-    border-radius: 4px;
-    color: var(--pm-text-primary);
-    font-family: 'Menlo', 'Monaco', monospace;
-    font-size: 12px;
-    padding: 8px;
-    resize: vertical;
-    outline: none;
-  }
 
-  .code-editor:focus {
-    border-color: var(--pm-primary);
-  }
 
   .editor-footer {
     padding: 10px 12px;
