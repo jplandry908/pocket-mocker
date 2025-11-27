@@ -165,7 +165,7 @@
   }
 
   /* Debug info styling */
-  .debug-info {
+  :global(.debug-info ){
     padding: 12px;
     color: var(--pm-text-secondary);
     font-size: 12px;
