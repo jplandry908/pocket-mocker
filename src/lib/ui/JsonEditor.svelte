@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { onDestroy, createEventDispatcher, tick } from 'svelte';
   import { EditorView, basicSetup } from 'codemirror';
   import { EditorState } from '@codemirror/state';
   import { json } from '@codemirror/lang-json';
@@ -9,10 +9,20 @@
 
   let editorContainer: HTMLDivElement;
   let editorView: EditorView | null = null;
+  let initialized = false;
 
   const dispatch = createEventDispatcher();
 
-  onMount(() => {
+  // Use reactive declaration instead of onMount for Shadow DOM compatibility
+  $: if (editorContainer && !initialized && !editorView) {
+    tick().then(() => {
+      initializeEditor();
+    });
+  }
+
+  function initializeEditor() {
+    if (!editorContainer || initialized || editorView) return;
+
     const root = editorContainer.getRootNode();
 
     try {
@@ -23,28 +33,6 @@
           json(),
           oneDark,
           EditorView.lineWrapping,
-          // Add padding to the editor content
-          EditorView.theme({
-            ".cm-content": {
-              padding: "10px 0"
-            },
-            ".cm-line": {
-              padding: "0 10px"
-            },
-            // Ensure gutter doesn't look squashed
-            ".cm-gutters": {
-              backgroundColor: "var(--pm-input-bg)", // Match input bg
-              borderRight: "1px solid var(--pm-border)",
-              color: "var(--pm-text-secondary)"
-            },
-            // Active line highlight
-            ".cm-activeLine": {
-              backgroundColor: "rgba(255, 255, 255, 0.05)"
-            },
-            ".cm-activeLineGutter": {
-              backgroundColor: "rgba(255, 255, 255, 0.05)"
-            }
-          }),
           EditorView.updateListener.of((update:any) => {
             if (update.docChanged) {
               dispatch('change', update.state.doc.toString());
@@ -59,10 +47,11 @@
         root: root instanceof ShadowRoot ? root : undefined
       });
 
+      initialized = true;
     } catch (e) {
-      console.error('[JsonEditor] Error loading editor:', e);
+      console.error('[JsonEditor] Failed to initialize:', e);
     }
-  });
+  }
 
   onDestroy(() => {
     if (editorView) {
@@ -71,8 +60,8 @@
     }
   });
 
-  // Reactive update when prop 'value' changes externally
-  $: if (editorView && value !== editorView.state.doc.toString()) {
+  // Handle value changes
+  $: if (initialized && editorView && value !== editorView.state.doc.toString()) {
     editorView.dispatch({
       changes: {
         from: 0,
@@ -81,63 +70,106 @@
       }
     });
   }
+
+  // Re-attempt initialization if container becomes visible
+  $: if (!initialized && !editorView && editorContainer && editorContainer.offsetWidth > 0) {
+    tick().then(() => {
+      initializeEditor();
+    });
+  }
 </script>
 
 <div class="json-editor-container" bind:this={editorContainer}></div>
 
 <style>
   .json-editor-container {
-    height: 100%;
-    min-height: 200px; /* Increased height */
     width: 100%;
-    overflow: hidden;
+    height: 200px; /* Fixed height for better visual consistency */
+    min-height: 200px;
     border: 1px solid var(--pm-border);
-    border-radius: 6px; /* Slightly more rounded */
-    transition: border-color 0.2s;
-  }
-  
-  /* Focus state for container */
-  .json-editor-container:focus-within {
-    border-color: var(--pm-primary);
-    box-shadow: 0 0 0 1px var(--pm-primary);
+    border-radius: 4px;
+    background-color: var(--pm-input-bg); /* Match container background with input field */
+    overflow: hidden; /* Prevent double scrollbars, let CM handle it */
+    position: relative;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  /* Override CodeMirror's default background to match theme */
-  :global(.cm-editor) {
-    height: 100%;
-    background-color: var(--pm-input-bg) !important;
-    font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace !important;
-    font-size: 13px !important; /* Slightly larger font */
-    line-height: 1.6 !important; /* Better line height */
+  /* Focus state for container - more stable approach */
+  .json-editor-container:focus-within {
+    border-color: #666;
+    outline: none;
+    box-shadow: 0 0 0 1px #666;
   }
-  
-  /* Remove default outline from CodeMirror when focused (handled by container) */
+
+  /* Ensure CodeMirror fills the container completely */
+  :global(.cm-editor) {
+    height: 100% !important;
+    width: 100% !important;
+    background-color: var(--pm-input-bg) !important;
+    border-radius: 4px;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Ensure the scroller fills the editor */
+  :global(.cm-scroller) {
+    height: 100% !important;
+    overflow: auto !important;
+    background-color: var(--pm-input-bg) !important;
+  }
+
+  /* Ensure content area matches background */
+  :global(.cm-content) {
+    background-color: var(--pm-input-bg) !important;
+    padding: 12px !important;
+    min-height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fix line background */
+  :global(.cm-line) {
+    background-color: transparent !important;
+  }
+
+  /* Remove CodeMirror's own focus indicators to prevent jumping */
   :global(.cm-editor.cm-focused) {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure no outline on content when focused */
+  :global(.cm-content) {
     outline: none !important;
   }
 
-  /* Adjust CodeMirror scroll bars */
-  :global(.cm-scroller) {
-    overflow: auto;
-  }
-
-  /* Custom Dark Scrollbar for CodeMirror */
+  /* Improve scrollbars */
   :global(.cm-scroller::-webkit-scrollbar) {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   :global(.cm-scroller::-webkit-scrollbar-track) {
-    background: transparent;
+    background: var(--pm-input-bg) !important;
   }
   :global(.cm-scroller::-webkit-scrollbar-thumb) {
-    background: #444;
-    border-radius: 5px;
-    border: 2px solid var(--pm-input-bg);
+    background: var(--pm-text-secondary) !important;
+    border-radius: 4px;
+    border: none;
   }
   :global(.cm-scroller::-webkit-scrollbar-thumb:hover) {
-    background: #555;
+    background: var(--pm-text-primary) !important;
   }
   :global(.cm-scroller::-webkit-scrollbar-corner) {
-    background: transparent;
+    background: var(--pm-input-bg) !important;
+  }
+
+  /* Debug info styling */
+  .debug-info {
+    padding: 12px;
+    color: var(--pm-text-secondary);
+    font-size: 12px;
+    background-color: var(--pm-input-bg);
+    border-radius: 4px;
   }
 </style>

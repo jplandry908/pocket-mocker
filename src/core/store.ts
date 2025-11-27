@@ -36,13 +36,14 @@ export const initStore = async () => {
         isServerMode = true;
         const data = await res.json();
 
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           rules.set(data);
+          isServerMode = true;
           console.log(`[PocketMock] Server Mode: Loaded ${data.length} rules`);
           return; // ✅ 即使这里 return，下方的 finally 依然会执行！
         } else {
           isServerMode = false;
-          console.log('[PocketMock] Server empty, trying LocalStorage...');
+          console.log('[PocketMock] Server response invalid, trying LocalStorage...');
         }
       }
     } catch (e) {
