@@ -15,7 +15,7 @@
   - 引入轻量级路由匹配库（如 `regexparam` 或自研正则转换），保持零依赖或极小体积。
   - 在 `interceptor.ts` 中重构匹配逻辑，解析 URL 参数并注入到 Response 上下文中。
 
-### 1.2 UI/UX 深度优化 (UI Polish) 🔥 (High Priority)
+### 1.2 UI/UX 深度优化 (UI Polish) ✅ (Completed)
 针对现有 Dashboard 的交互痛点进行彻底改造，确保其作为“生产力工具”的易用性。
 - **样式隔离与组件化 (Style Isolation)**:
   - **问题**: 现有 `select/input` 依赖浏览器原生样式，易受宿主页面全局 CSS 污染。
