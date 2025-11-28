@@ -174,7 +174,7 @@
   function handleMouseDown(e: MouseEvent) {
     // Only allow dragging from header, ignore buttons
     if ((e.target as HTMLElement).closest('button')) return;
-    
+
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
@@ -265,9 +265,7 @@
   class:editing-mode={!!editingId && !minimized}
   bind:this={containerRef}
 >
-  <Toast />
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="header" on:mousedown={handleMouseDown}>
+  <div class="header" role="button" aria-label="Drag to move panel" tabindex="0" on:mousedown={handleMouseDown}>
     <div class="title-area">
       <h3>PocketMock</h3>
       {#if minimized && $rules.length > 0}
@@ -297,6 +295,8 @@
     </button>
   </div>
 
+  {#if !minimized}
+    <Toast />
     {#if editingId}
       <div class="editor-panel">
         <!-- Top Config Bar -->
@@ -541,6 +541,7 @@
         </div>
       {/if}
     </div>
+  {/if}
   {/if}
 </div>
 

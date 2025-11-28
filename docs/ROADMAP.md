@@ -30,7 +30,7 @@
   - **问题**: 固定右下角可能遮挡页面内容。
   - **方案**: 实现面板的自由拖拽与边缘吸附功能。
 
-### 1.3 动态响应 (Dynamic Response)
+### 1.3 动态响应 (Dynamic Response) ✅ (Completed)
 静态 JSON 无法满足根据请求参数返回不同结果的需求。
 - **功能特性**:
   - 支持函数式定义: `response: (req, params) => any`。
@@ -48,7 +48,7 @@
     }
     ```
 
-### 1.4 开发者面板升级 (Dashboard 2.0)
+### 1.4 开发者面板升级 (Dashboard 2.0) ✅ (Completed)
 目前的 Svelte 面板功能较为基础。
 - **功能特性**:
   - **Monaco Editor 集成**: 替换简单的 `<textarea>`，提供 JSON 语法高亮、错误提示、折叠功能。
@@ -56,7 +56,7 @@
   - **快捷操作**: 从 Network 面板一键“生成规则”，将真实请求转为 Mock 规则。
   - **暗色模式**: 适配系统深色主题。
 
-### 1.5 工程化建设
+### 1.5 工程化建设 ✅ (Completed)
 - **测试体系**: 建立单元测试 (Vitest) 和 E2E 测试 (Playwright)，确保拦截逻辑在不同浏览器中的稳定性。
 - **类型定义**: 完善 `d.ts` 文件，确保用户在 `pocket-mock.config.ts` 中获得完美的 TypeScript 提示。
 
