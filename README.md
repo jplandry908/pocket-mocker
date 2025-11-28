@@ -18,6 +18,7 @@
 - **🎨 Visual Console**: Built-in Svelte debugging panel with **CodeMirror 6** editor (JS syntax highlighting), toggle switches, and real-time preview
 - **🧠 Dynamic Response**: Support writing JavaScript functions to handle complex logic and return dynamic data based on request parameters
 - **✨ Smart UI**: Auto-adaptive **Light/Dark Theme**, elegant **Toast** notifications, and responsive layout
+- **🌐 Comprehensive Network Panel**: Logs all network requests (mocked or real), with **search & filter**, **details view** (request/response body), **single-log deletion**, and **"Mock It"** feature to convert real requests into mock rules with one click.
 - **🛡️ Shadow DOM Isolation**: UI styles are completely isolated, never polluting your application's CSS or being affected by external styles
 - **🐢 Network Simulation**: One-click simulation of API **latency**, **404/500 errors**, perfect for testing skeleton screens and error boundaries
 - **📂 Dual-Mode Persistence**:
@@ -25,7 +26,6 @@
   - **Server Mode**: Vite plugin integration saves rules to local files for **team collaboration**
 
 ## 📦 Installation
-
 ```bash
 npm install pocket-mock --save-dev
 # or
@@ -58,7 +58,7 @@ Ideal for production-level projects. The Vite plugin integrates with the file sy
 **1. Configure `vite.config.ts`**
 
 ```typescript
-import { defineConfig } from 'vite';
+import { defineConfig } => 'vite';
 import pocketMockPlugin from 'pocket-mock/vite-plugin';
 
 export default defineConfig({
@@ -117,17 +117,18 @@ interface MockRule {
 }
 ```
 
-### Network Log Panel
+### Comprehensive Network Panel
 
-Built-in Network panel displays intercepted requests in real-time:
+The built-in Network panel logs all network requests (both mocked and real) in real-time, providing powerful debugging capabilities:
 
-- **Request URL and Method**
-- **Response Status Code**
-- **Request Duration**
-- **Mock vs Real Request Indicator**
+-   **All Requests**: See every `fetch` and `XMLHttpRequest` call made by your application.
+-   **Search & Filter**: Quickly find requests by URL or method, and filter by type (Mocked/Real).
+-   **Details View**: Click on any log entry to expand and view the full response body.
+-   **"Mock It" Feature**: Convert any real network request into a new mock rule with a single click, automatically pre-filling the URL, method, and response body.
+-   **Single Log Deletion**: Remove individual log entries for better clarity.
+-   **Clear All Logs**: Clear the entire log history instantly.
 
 ### Smart Fallback Strategy
-
 PocketMock uses a progressive architecture:
 
 1. **Startup**: Attempts to connect to development server API

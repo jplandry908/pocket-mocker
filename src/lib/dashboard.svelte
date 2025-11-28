@@ -552,6 +552,33 @@
 </div>
 
 <style>
+  /* Custom Scrollbar Styles for Webkit browsers */
+  /* Target all scrollable elements within the component (Shadow DOM context) */
+  :host::-webkit-scrollbar,
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  :host::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-track {
+    background: var(--pm-bg-secondary); /* Match background */
+    border-radius: 4px;
+  }
+  :host::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-thumb {
+    background: var(--pm-text-secondary); /* Scrollbar color */
+    border-radius: 4px;
+    border: 2px solid var(--pm-bg-secondary); /* Padding effect */
+  }
+  :host::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--pm-text-primary);
+  }
+  :host::-webkit-scrollbar-corner,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
   /* Reset & Base */
   * { box-sizing: border-box; }
 
