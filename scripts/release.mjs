@@ -47,25 +47,27 @@ try {
 
 // 3. 更新版本号（补丁版本）
 console.log('📝 更新版本号...');
-const timestamp = Math.floor(Date.now() / 1000);
-const patchVersion = `${currentVersion}.${timestamp}`;
-console.log(`📦 新版本: ${patchVersion}`);
+// 解析当前版本并增加补丁号
+const [major, minor, patch] = currentVersion.split('.').map(Number);
+const newPatchVersion = patch + 1;
+const newVersion = `${major}.${minor}.${newPatchVersion}`;
+console.log(`📦 新版本: ${newVersion}`);
 
 // 更新 package.json 版本
 const packageJsonPath = './package.json';
 const packageData = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-packageData.version = patchVersion;
+packageData.version = newVersion;
 writeFileSync(packageJsonPath, JSON.stringify(packageData, null, 2));
 console.log('✅ 版本已更新到 package.json');
 
 // 4. 提交并推送更改
 console.log('📝 提交更改中...');
 execSync('git add .', { encoding: 'utf8' });
-execSync(`git commit -m "feat: 发布v${patchVersion}版本 - 更新GIF演示和修复TypeScript错误"`, { encoding: 'utf8' });
+execSync(`git commit -m "feat: 发布v${newVersion}版本 - 更新GIF演示和修复TypeScript错误"`, { encoding: 'utf8' });
 
 // 5. 创建发布标签
 console.log('📦 创建发布标签...');
-execSync(`git tag v${patchVersion} -m "发布v${patchVersion}"`, { encoding: 'utf8' });
+execSync(`git tag v${newVersion} -m "发布v${newVersion}"`, { encoding: 'utf8' });
 
 // 6. 发布到npm
 console.log('🚀 发布到npm...');
@@ -74,4 +76,4 @@ execSync('npm publish --registry https://registry.npmjs.org/', { encoding: 'utf8
 // 7. 清理
 console.log('✅ 发布完成！');
 console.log(`📦 包名: pocket-mocker`);
-console.log(`📦 版本: ${patchVersion}`);
+console.log(`📦 版本: ${newVersion}`);
