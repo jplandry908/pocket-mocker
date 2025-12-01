@@ -27,7 +27,7 @@ export function defineConfig(config: MockRule[]): MockRule[] {
   return config;
 }
 
-export function start(options: PocketMockOptions = {}) {
+export function pocketMock(options: PocketMockOptions = {}) {
   // 1. Initialize interceptor core
   initInterceptor();
 

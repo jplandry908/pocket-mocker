@@ -42,11 +42,11 @@ pnpm add pocket-mock -D
 Perfect for individual development or quick experimentation. Simply import and start in your project's entry file:
 
 ```javascript
-import { start } from 'pocket-mock';
+import { pocketMock } from 'pocket-mock';
 
 // Only start in development environment
 if (process.env.NODE_ENV === 'development') {
-  start();
+  pocketMock();
 }
 ```
 
@@ -422,9 +422,9 @@ This ensures compatibility with Webpack, RSPack, or even pure HTML projects.
 ### Custom Integration
 
 ```javascript
-import { start } from 'pocket-mock';
+import { pocketMock } from 'pocket-mock';
 
-start({
+pocketMock({
   enable: true // Optional explicit enable flag
 });
 ```
@@ -434,7 +434,7 @@ start({
 Full TypeScript support included:
 
 ```typescript
-import { start, MockRule } from 'pocket-mock';
+import { pocketMock, MockRule } from 'pocket-mock';
 
 // Types are automatically available
 const rule: MockRule = {

@@ -41,11 +41,11 @@ pnpm add pocket-mock -D
 适合个人开发或快速尝试。直接在项目的入口文件（如 `src/main.ts` 或 `src/index.js`）中引入并启动：
 
 ```javascript
-import { start } from 'pocket-mock';
+import { pocketMock } from 'pocket-mock';
 
 // 仅在开发环境下启动
 if (process.env.NODE_ENV === 'development') {
-  start();
+  pocketMock();
 }
 ```
 
@@ -420,9 +420,9 @@ PocketMock 采用渐进式架构：
 ### 自定义集成
 
 ```javascript
-import { start } from 'pocket-mock';
+import { pocketMock } from 'pocket-mock';
 
-start({
+pocketMock({
   enable: true // 可选的显式启用标志
 });
 ```
@@ -432,7 +432,7 @@ start({
 完整的 TypeScript 支持：
 
 ```typescript
-import { start, MockRule } from 'pocket-mock';
+import { pocketMock, MockRule } from 'pocket-mock';
 
 // 类型自动可用
 const rule: MockRule = {
