@@ -472,7 +472,7 @@ npm test
 
 ## 📄 License
 
-MIT © [Your Name](https://github.com/tianchangNorth)
+MIT © [tianchangNorth](https://github.com/tianchangNorth)
 
 ## 🙏 Acknowledgments
 

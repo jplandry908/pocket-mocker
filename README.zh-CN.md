@@ -467,7 +467,7 @@ npm test
 
 ## 📄 开源协议
 
-MIT © [Your Name](https://github.com/tianchangNorth)
+MIT © [tianchangNorth](https://github.com/tianchangNorth)
 
 ## 🙏 致谢
 
