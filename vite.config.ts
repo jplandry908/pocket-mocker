@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { fileURLToPath } from 'node:url'
+
 import path from 'node:path'
 import pocketMockPlugin from './plugin/vite-plugin-pocket-mock.js'
 import dts from 'vite-plugin-dts'
-
 export default defineConfig({
   plugins: [
     svelte({
@@ -19,6 +20,11 @@ export default defineConfig({
       tsconfigPath: './tsconfig.app.json'
     })
   ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),

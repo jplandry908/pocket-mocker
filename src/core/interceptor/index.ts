@@ -1,10 +1,10 @@
-import { requestLogs } from "../store/log-store";
-import { appReady } from '../store/store';
+import { requestLogs } from "@/store/log-store";
+import { appReady } from '@/store/store';
 import { matchRoute } from './matcher';
 import { generateMockData } from './smart-mock';
+import { createMockRequest } from './mock-request'
 
-import type { MockRequest, MockRule } from './types';
-export type { MockRule };
+import type { MockRule } from './types';
 
 let activeRules: MockRule[] = []
 
@@ -19,47 +19,6 @@ export function updateRules(rules: MockRule[]) {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function createMockRequest(
-  url: string,
-  method: string,
-  headers: Headers,
-  bodyData: any,
-  params: Record<string, string>
-): Promise<MockRequest> {
-  const urlObj = new URL(url, window.location.origin);
-  const query: Record<string, string> = {};
-  urlObj.searchParams.forEach((value, key) => {
-    query[key] = value;
-  });
-
-  const requestHeaders: Record<string, string> = {};
-  headers.forEach((value, key) => {
-    requestHeaders[key] = value;
-  });
-
-  let jsonBody: any = undefined;
-  const contentType = requestHeaders['content-type'] || '';
-  if (bodyData && typeof bodyData === 'string' && contentType.includes('application/json')) {
-    try {
-      jsonBody = JSON.parse(bodyData);
-    } catch (e: any) {
-      throw new Error('Failed to parse JSON: Unknown error');
-    }
-  }
-
-  const finalBody = jsonBody || bodyData;
-
-  return {
-    url: url,
-    method: method,
-    headers: requestHeaders,
-    body: finalBody,
-    json: jsonBody,
-    params: params,
-    query: query,
-  };
-}
 
 export function patchFetch() {
   const originalFetch = window.fetch;
@@ -179,7 +138,6 @@ export function patchFetch() {
       );
     }
 
-    // === Real Request Monitoring ===
     const promise = originalFetch(input, init);
 
     promise.then(async (response) => {

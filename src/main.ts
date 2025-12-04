@@ -1,12 +1,11 @@
 import Dashboard from './lib/dashboard.svelte';
-import { initInterceptor } from './core/interceptor';
+import { initInterceptor } from '@/core/interceptor';
 import { initStore, addRule } from './store/store';
 import axios from 'axios';
 
 initInterceptor();
 initStore();
 
-// Scenario A: Smart Mock (Realistic Data)
 const profileRule = {
   "id": "profile-demo",
   "url": "/api/user/profile",
@@ -27,13 +26,11 @@ const profileRule = {
 };
 addRule(profileRule.url, profileRule.method, profileRule.response);
 
-// Scenario C: Dynamic Logic (Function Mock)
 const loginRule = {
   "id": "login-demo",
   "url": "/api/auth/login",
   "method": "POST",
   "response": (req: any) => {
-    // Parse body if needed (axios handles it, but raw fetch might need parsing)
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     if (body.username === 'admin') {

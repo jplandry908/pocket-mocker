@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateMockData } from '../src/core/smart-mock';
+import { generateMockData } from '../src/core/interceptor/smart-mock';
 import { importPostmanCollection } from '../src/core/importers/postman';
 import { importOpenAPI } from '../src/core/importers/openapi';
 
@@ -15,7 +15,7 @@ describe('配置导入与Smart Mock集成测试', () => {
             header: [],
             url: { raw: '/users' },
             body: {
-              mode: 'raw',
+              mode: 'raw' as const,
               raw: JSON.stringify({
                 name: 'John Doe',
                 email: 'john@example.com',

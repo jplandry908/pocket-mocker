@@ -1,6 +1,4 @@
-export interface MockGenerator {
-  (args?: string): any;
-}
+import type { MockGenerator } from './types'
 
 const generators: Record<string, MockGenerator> = {
 
@@ -42,7 +40,7 @@ const generators: Record<string, MockGenerator> = {
     const startTimestamp = startDate.getTime();
     const endTimestamp = endDate.getTime();
     const randomTimestamp = startTimestamp + Math.random() * (endTimestamp - startTimestamp);
-    return new Date(randomTimestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+    return new Date(randomTimestamp).toISOString().split('T')[0];
   },
 
   image: (args?: string) => {

@@ -1,12 +1,4 @@
-interface MatchResult {
-  match: boolean;
-  params: Record<string, string>;
-}
-
-interface ParsedRoute {
-  regex: RegExp;
-  keys: string[];
-}
+import type { MatchResult, ParsedRoute } from './types'
 
 const patternCache = new Map<string, ParsedRoute | null>();
 

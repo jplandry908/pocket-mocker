@@ -1,4 +1,4 @@
-import type { MockRule } from '../types';
+import type { MockRule } from '../interceptor/types';
 import type { OpenAPIDocument, OpenAPISchema } from './types';
 
 

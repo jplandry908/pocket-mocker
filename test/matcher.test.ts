@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchRoute } from '../src/core/matcher';
+import { matchRoute } from '../src/core/interceptor/matcher';
 
 describe('Route Matcher', () => {
   it('Legacy exact match should pass', () => {

@@ -20,3 +20,17 @@ export interface MockRule {
   status: number;
   headers: Record<string, string>;
 }
+
+export interface MatchResult {
+  match: boolean;
+  params: Record<string, string>;
+}
+
+export interface ParsedRoute {
+  regex: RegExp;
+  keys: string[];
+}
+
+export interface MockGenerator {
+  (args?: string): any;
+}

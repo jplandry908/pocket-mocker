@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
-import { updateRules as updateInterceptorRules } from '../core/interceptor';
-import type { MockRule } from '../core/types';
+import { updateRules as updateInterceptorRules } from '@/core/interceptor/index';
+import type { MockRule } from '../core/interceptor/types';
 
 const STORAGE_KEY = 'pocket_mock_rules_v1';
 let isServerMode = false;

@@ -12,6 +12,9 @@
     "checkJs": true,
     "moduleDetection": "force",
     "declaration": true,
+    "paths": {
+      "@/*": ["./src/*"],
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }
