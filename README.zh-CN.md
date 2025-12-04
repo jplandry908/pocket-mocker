@@ -4,12 +4,12 @@
 >
 > 一款轻量级、可视化的浏览器内 HTTP Mock 工具，专为现代前端开发而设计。
 
-**🚀 在线演示:** [https://tianchangnorth.github.io/pocket-mocker/](https://tianchangnorth.github.io/pocket-mocker/)
+**在线演示:** [https://tianchangnorth.github.io/pocket-mocker/](https://tianchangnorth.github.io/pocket-mocker/)
 
 [![npm 版本](https://badge.fury.io/js/pocket-mocker.svg)](https://badge.fury.io/js/pocket-mocker)
 [![开源协议: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[English](README.md) | **中文**
+[English](README.md) | **中文文档**
 
 ![PocketMocker Demo](docs/pocket.webp)
 
@@ -37,7 +37,7 @@ yarn add pocket-mocker -D
 pnpm add pocket-mocker -D
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 方式一：零配置使用（本地模式）
 
@@ -58,7 +58,17 @@ if (process.env.NODE_ENV === 'development') {
 
 适合生产级项目。通过 Vite 插件打通文件系统，将 Mock 规则保存为配置文件。
 
-**1. 配置 `vite.config.ts`**
+**1. 在项目的入口文件（如 `src/main.ts` 或 `src/index.js`）中引入并启动**
+```javascript
+import { pocketMock } from 'pocket-mocker';
+
+// 仅在开发环境下启动
+if (process.env.NODE_ENV === 'development') {
+  pocketMock();
+}
+```
+
+**2. 配置 `vite.config.ts`**
 
 ```typescript
 import { defineConfig } from 'vite';
@@ -220,7 +230,7 @@ PocketMock 内置了强大的 **智能 Mock 生成器**，让你可以通过简�
 }
 ```
 
-### 📥 配置导入
+### 配置导入
 
 支持从主流 API 文档格式直接导入 Mock 规则。智能数据生成功能自动将请求体和 Schema 定义转换为逼真的 Mock 响应数据。
 
@@ -402,13 +412,13 @@ PocketMock 采用渐进式架构：
 
 这意味着它可以在 Webpack、RSPack 甚至纯 HTML 项目中正常工作。
 
-## 💡 技术原理
+## 技术原理
 
 - **Monkey Patching**：通过重写 `window.fetch` 和继承 `XMLHttpRequest` 原型链实现拦截
 - **Shadow DOM**：使用 Web Components 技术将调试台 UI 封装在 Shadow Root 中，实现样式完全沙箱化
 - **Vite Library Mode**：使用 Vite 库模式打包，结合 `css: 'injected'` 策略，将所有 CSS 内联至 JS 中，实现 npm 包的**单文件引入**体验
 
-## 🎯 使用场景
+## 使用场景
 
 - **API 开发**：在后端 API 完成前模拟响应数据
 - **错误测试**：模拟网络故障、超时和服务器错误
@@ -416,7 +426,7 @@ PocketMock 采用渐进式架构：
 - **离线开发**：无需后端依赖即可独立开发
 - **团队协作**：在开发团队间共享 Mock 配置
 
-## 🔧 高级配置
+## 高级配置
 
 ### 自定义集成
 
@@ -448,7 +458,7 @@ const rule: MockRule = {
 };
 ```
 
-## 🤝 贡献
+## 贡献
 
 本地开发环境搭建：
 
@@ -471,12 +481,6 @@ npm test
 
 MIT © [tianchangNorth](https://github.com/tianchangNorth)
 
-## 🙏 致谢
-
-- 使用 [Svelte](https://svelte.dev/) 构建响应式 UI
-- 由 [Vite](https://vitejs.dev/) 提供快速开发和构建支持
-- 灵感来源于现代 Web 开发对更好调试工具的需求
-
 ---
 
-**享受 Mock 的乐趣！🚀**
+**享受 Mock 的乐趣！**

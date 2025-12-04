@@ -4,12 +4,12 @@
 >
 > A lightweight, visual debugging tool that intercepts and modifies HTTP requests directly in your browser.
 
-**🚀 Live Demo:** [https://tianchangnorth.github.io/pocket-mocker/](https://tianchangnorth.github.io/pocket-mocker/)
+**Live Demo:** [https://tianchangnorth.github.io/pocket-mocker/](https://tianchangnorth.github.io/pocket-mocker/)
 
 [![npm version](https://badge.fury.io/js/pocket-mocker.svg)](https://badge.fury.io/js/pocket-mocker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT). 
 
-**English** | [中文](README.zh-CN.md)
+**English** | [中文文档](README.zh-CN.md)
 
 ![PocketMocker Demo](docs/pocket.webp)
 
@@ -30,7 +30,7 @@
   - **Local Mode**: Default browser LocalStorage storage, rules persist across page refreshes
   - **Server Mode**: Vite plugin integration saves rules to local files for **team collaboration**
 
-## 📦 Installation
+## Installation
 ```bash
 npm install pocket-mocker --save-dev
 # or
@@ -39,7 +39,7 @@ yarn add pocket-mocker -D
 pnpm add pocket-mocker -D
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Method 1: Zero Configuration (Local Mode)
 
@@ -60,7 +60,18 @@ After starting your project, you'll see the **PocketMock** floating panel in the
 
 Ideal for production-level projects. The Vite plugin integrates with the file system, saving Mock rules to config files for team sharing.
 
-**1. Configure `vite.config.ts`**
+**1. import and start in your project's entry file:**
+
+```javascript
+import { pocketMock } from 'pocket-mocker';
+
+// Only start in development environment
+if (process.env.NODE_ENV === 'development') {
+  pocketMock();
+}
+```
+
+**2. Configure `vite.config.ts`**
 
 ```typescript
 import { defineConfig } from 'vite';
@@ -407,13 +418,13 @@ PocketMock uses a progressive architecture:
 
 This ensures compatibility with Webpack, RSPack, or even pure HTML projects.
 
-## 💡 Technical Architecture
+## Technical Architecture
 
 - **Monkey Patching**: Intercepts requests by overriding `window.fetch` and extending `XMLHttpRequest` prototype chain
 - **Shadow DOM**: Encapsulates debugging UI in Shadow Root for complete style sandboxing
 - **Vite Library Mode**: Uses Vite's library mode with `css: 'injected'` strategy to inline all CSS into JS for **single-file import** experience
 
-## 🎯 Use Cases
+## Use Cases
 
 - **API Development**: Mock backend responses before API completion
 - **Error Testing**: Simulate network failures, timeouts, and server errors
@@ -421,7 +432,7 @@ This ensures compatibility with Webpack, RSPack, or even pure HTML projects.
 - **Offline Development**: Work without backend dependencies
 - **Team Collaboration**: Share Mock configurations across development teams
 
-## 🔧 Advanced Configuration
+## Advanced Configuration
 
 ### Custom Integration
 
@@ -453,7 +464,7 @@ const rule: MockRule = {
 };
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Local development setup:
 
@@ -475,13 +486,6 @@ npm test
 ## 📄 License
 
 MIT © [tianchangNorth](https://github.com/tianchangNorth)
-
-## 🙏 Acknowledgments
-
-- Built with [Svelte](https://svelte.dev/) for reactive UI
-- Powered by [Vite](https://vitejs.dev/) for fast development and building
-- Inspired by modern web development needs for better debugging tools
-
 ---
 
-**Happy Mocking! 🚀**
+**Happy Mocking! **
