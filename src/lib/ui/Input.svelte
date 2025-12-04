@@ -47,13 +47,12 @@
     color: var(--pm-text-placeholder, #666);
   }
 
-  /* Hide spinner/stepper for number inputs */
   .pm-input[type="number"]::-webkit-inner-spin-button,
   .pm-input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
   .pm-input[type="number"] {
-    -moz-appearance: textfield; /* Firefox */
+    -moz-appearance: textfield;
   }
 </style>

@@ -39,13 +39,12 @@
 
   .pm-btn.icon {
     padding: 0;
-    width: 32px; /* Match md height */
+    width: 32px;
   }
   .pm-btn.sm.icon {
     width: 24px;
   }
 
-  /* Variants */
   .pm-btn.primary {
     background: var(--pm-primary, #646cff);
     color: white;

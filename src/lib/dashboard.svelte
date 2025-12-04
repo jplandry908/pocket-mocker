@@ -204,14 +204,12 @@
   let initialBottom = 0;
   let containerRef: HTMLDivElement;
   
-  // Normalize position on mount to ensure consistent behavior
   onMount(() => {
     if (containerRef) {
       const rect = containerRef.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      // Calculate distances
       const right = viewportWidth - rect.right;
       const bottom = viewportHeight - rect.bottom;
       
@@ -266,24 +264,17 @@
     const width = containerRef.offsetWidth;
     const height = containerRef.offsetHeight;
 
-    // Prevent going off-screen right
     if (newRight < 0) newRight = 0;
-    // Prevent going off-screen left
     if (newRight > viewportWidth - width) newRight = viewportWidth - width;
-
-    // Prevent going off-screen bottom
     if (newBottom < 0) newBottom = 0;
-    // Prevent going off-screen top (ensure header stays visible)
     if (newBottom > viewportHeight - height) newBottom = viewportHeight - height;
 
-    // Update styles
     containerRef.style.right = `${newRight}px`;
     containerRef.style.bottom = `${newBottom}px`;
   }
 
   function handleMouseUp() {
     isDragging = false;
-    // Restore transition for minimize/expand animations
     if (containerRef) {
        containerRef.style.transition = '';
     }
@@ -293,16 +284,12 @@
 
   $: if (!minimized && containerRef) {
     const viewportHeight = window.innerHeight;
-    // Match CSS max-height constraints
     const maxHeight = Math.min(600, viewportHeight * 0.85);
     
-    // Get current bottom value
     const currentBottom = parseFloat(containerRef.style.bottom) || 0;
     
-    // Calculate where the top would be after expansion
     const projectedTop = viewportHeight - currentBottom - maxHeight;
     
-    // If top would be off-screen (or too close to top), shift down
     if (projectedTop < 24) {
       const newBottom = Math.max(0, viewportHeight - maxHeight - 24);
       containerRef.style.bottom = `${newBottom}px`;
@@ -356,7 +343,7 @@
     <Toast />
     {#if editingId}
       <div class="editor-panel">
-        <!-- Top Config Bar -->
+
         <div class="rule-config-bar">
            <div class="rule-config-row primary">
              <div style="width: 110px;">
@@ -762,7 +749,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: var(--pm-bg-tertiary); /* Lighter/Darker header background */
+    background: var(--pm-bg-tertiary); 
     border-bottom: 1px solid var(--pm-border);
   }
 
@@ -911,7 +898,7 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-    min-width: 0; /* enable text truncation */
+    min-width: 0; 
   }
 
   .url {

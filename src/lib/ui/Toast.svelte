@@ -32,12 +32,12 @@
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 100000; /* High z-index to appear above everything */
+    z-index: 100000; 
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    pointer-events: none; /* Allow clicks to pass through container */
+    pointer-events: none; 
   }
 
   .toast {
@@ -50,16 +50,15 @@
     pointer-events: auto;
     cursor: pointer;
     min-width: 240px;
-    text-align: left; /* Left align for better readability */
+    text-align: left; 
     border: 1px solid var(--pm-border, rgba(255, 255, 255, 0.1));
-    border-left-width: 4px; /* Accent border */
+    border-left-width: 4px; 
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  /* Theme Variants - Accent Colors */
   .toast.info {
     border-left-color: var(--pm-primary, #3b82f6);
   }

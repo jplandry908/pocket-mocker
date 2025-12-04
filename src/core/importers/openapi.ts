@@ -1,9 +1,6 @@
 import type { MockRule } from '../interceptor/types';
 import type { OpenAPIDocument, OpenAPISchema } from './types';
 
-
-// Converts an OpenAPI 3.0 Document to PocketMock rules.
-
 export function importOpenAPI(doc: OpenAPIDocument): MockRule[] {
   const rules: MockRule[] = [];
   const schemas = doc.components?.schemas || {};
@@ -64,7 +61,7 @@ function generateResponseFromOperation(operation: any, schemas: Record<string, O
  * Handles recursion, refs, and smart mock inference.
  */
 function generateMockFromSchema(schema: OpenAPISchema, schemas: Record<string, OpenAPISchema>, depth = 0): any {
-  if (depth > 5) return null; // Prevent infinite recursion
+  if (depth > 5) return null;
 
   if (schema.$ref) {
     const refName = schema.$ref.split('/').pop();
@@ -91,7 +88,6 @@ function generateMockFromSchema(schema: OpenAPISchema, schemas: Record<string, O
   }
 
   if (schema.type === 'array') {
-
     if (schema.items) {
       return [generateMockFromSchema(schema.items, schemas, depth + 1)];
     }
