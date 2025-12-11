@@ -118,7 +118,7 @@ PocketMock 内置强大的生成器，使用简单语法即可生成逼真的测
 | 语法 | 描述 | 示例 |
 |:---|:---|:---|
 | `@guid` | UUID | `"f47ac-..."` |
-| `@cname` / `@name` | 姓名 | `"张三"` / `"John"` |
+| `@name` | 姓名 | `"John"` |
 | `@email` | 邮箱 | `"user@example.com"` |
 | `@image(200x200)` | 图片 URL | `"https://via..."` |
 | `@date` | 日期 | `"2023-12-25"` |
@@ -134,7 +134,7 @@ PocketMock 内置强大的生成器，使用简单语法即可生成逼真的测
   "data": {
     "users|5": { // 生成包含 5 个用户的数组
       "id": "@guid",
-      "name": "@cname",
+      "name": "@name",
       "avatar": "@image(100x100)",
       "role": "@pick(管理员,访客,编辑)",
       "score": "@integer(60,100)"

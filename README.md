@@ -128,7 +128,7 @@ PocketMock includes a powerful **Smart Mock Generator** that allows you to creat
 | Syntax | Description | Example |
 |:---|:---|:---|
 | `@guid` | UUID | `"f47ac-..."` |
-| `@cname` / `@name` | Name | `"John Doe"` |
+| `@name` | Name | `"John Doe"` |
 | `@email` | Email | `"user@example.com"` |
 | `@image(200x200)` | Image URL | `"https://via..."` |
 | `@date` | Date | `"2023-12-25"` |

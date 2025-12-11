@@ -81,7 +81,7 @@
 
 - **Dual-Core Interception Engine**: Natively supports both `fetch` and `XMLHttpRequest` (Ajax), ensuring seamless compatibility with libraries like Axios.
 - **Smart Dashboard**: A built-in visual control panel injected into your page. It features a CodeMirror 6 editor, dark/light theme support, and intuitive rule management.
-- **Intelligent Mock Data Generation**: Built-in "Smart Mock" generator allows you to create realistic data effortlessly using placeholders like `@guid`, `@cname`, `@image`, `@email`, and `@date`. Supports complex nested structures and array generation (`key|count`).
+- **Intelligent Mock Data Generation**: Built-in "Smart Mock" generator allows you to create realistic data effortlessly using placeholders like `@guid`, `@name`, `@image`, `@email`, and `@date`. Supports complex nested structures and array generation (`key|count`).
 - **One-Click Import**:
   - **Postman Collection v2.1**: Import your existing Postman collections directly.
   - **OpenAPI 3.0 (Swagger)**: Import API specifications.
