@@ -14,8 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Install npm
+        uses: npm/action-setup@v2
         with:
           version: 8
 
@@ -23,16 +23,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: test
-        run: pnpm test
+        run: npm test
 
       - name: TypeScript type check
-        run: pnpm check
+        run: npm run check
 
       - name: Build
-        run: pnpm build
+        run: npm run build
